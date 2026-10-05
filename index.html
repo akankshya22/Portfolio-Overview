@@ -381,6 +381,26 @@ a.cval:hover{color:var(--accent)}
   .top nav::-webkit-scrollbar{display:none}
   .top nav a::after{bottom:4px}
 }
+
+/* breadcrumb */
+.crumb{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-3);white-space:nowrap;min-width:0}
+.crumb__now{color:var(--accent);display:inline-block;transition:opacity .25s,transform .25s}
+.crumb__now.swap{opacity:0;transform:translateY(4px)}
+@media (max-width:600px){.crumb__root{display:none}.crumb__sep{display:none}.crumb{padding:3px 8px;border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:999px;background:color-mix(in srgb,var(--accent) 6%,transparent)}}
+/* currently reading */
+.reading{display:flex;align-items:center;gap:14px;margin-top:22px;padding:12px 16px 12px 12px;border:1px solid var(--line);border-radius:10px;width:fit-content;max-width:100%;background:var(--surface)}
+.reading > span:last-child{display:flex;flex-direction:column;gap:3px}
+.reading .mono{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-3)}
+.reading__title{font-size:15px;color:var(--fg)}
+.reading__title em{font-style:italic}
+.reading__book{flex:0 0 26px;width:26px;height:36px;border-radius:2px 4px 4px 2px;background:var(--accent);box-shadow:inset 4px 0 0 rgba(0,0,0,.18);position:relative;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.reading__book::after{content:"";position:absolute;left:9px;right:5px;top:9px;height:2px;background:rgba(255,255,255,.75);box-shadow:0 5px 0 rgba(255,255,255,.45)}
+.reading:hover .reading__book{transform:rotate(-8deg) translateY(-2px)}
+/* photo nudge */
+.ph::after{content:"";position:absolute;left:var(--nx,50%);top:var(--ny,30%);width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;border:1.5px solid rgba(255,255,255,.9);opacity:0;pointer-events:none}
+.ph.nudge::after{animation:ripple 1.1s ease-out}
+@keyframes ripple{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(3.2)}}
+@media (prefers-reduced-motion:reduce){.ph.nudge::after{animation:none}}
 </style>
 </head>
 <body>
@@ -388,7 +408,7 @@ a.cval:hover{color:var(--accent)}
 
 <header class="top">
   <div class="wrap">
-    <div class="top__id"><a class="top__name" href="#top">Akankshya Pradhan</a><span class="top__tag">Portfolio overview</span></div>
+    <div class="top__id"><a class="top__name" href="#top">Akankshya Pradhan</a><span class="crumb" aria-live="polite"><span class="crumb__root">Portfolio overview</span><span class="crumb__sep" aria-hidden="true">/</span><span class="crumb__now" id="crumbNow">Intro</span></span></div>
     <nav aria-label="Sections"><a href="#process">How I work</a><a href="#work">Work</a><a href="#side">Side project</a><a href="#playground">Playground</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
   </div>
 </header>
@@ -398,7 +418,7 @@ a.cval:hover{color:var(--accent)}
   <div class="wrap">
     <div class="grid hero__grid">
       <div class="hero__text">
-        <p class="status"><i aria-hidden="true"></i>Open to UX and product design roles, and exploring product management too</p>
+        <p class="status"><i aria-hidden="true"></i>Open to UX and product design roles, and curious about trying my hands at product management as well</p>
         <h1>I design products people <span class="rot" id="rot">actually use</span>.</h1>
         <p class="hero__sub">I'm a product designer who works end to end: research, strategy, interaction design, systems and prototypes in real code. I've shaped factory platforms, a control panel design system, a travel brand and an open-source archive, and I'm drawn to any product where people meet complexity.</p>
         <div class="btns">
@@ -631,6 +651,7 @@ a.cval:hover{color:var(--accent)}
         <p class="big">I'm curious about everything, from complex systems and behavioural patterns to visual storytelling and everyday experiences.</p>
         <p class="muted">Problem-solving gives me a thrill. I love talking about how systems shape human behaviour, and I keep exploring design, culture and civic tech. </p>
         <p class="muted">When I'm not designing, you'll find me reading books, watching films, taking photographs or obsessing over typography.</p>
+        <p class="reading"><span class="reading__book" aria-hidden="true"></span><span><span class="mono">Currently reading</span><span class="reading__title"><em>Educated</em> by Tara Westover</span></span></p>
         <a class="cslink" href="#contact">Let's talk <span aria-hidden="true">→</span></a>
       </div>
       <div class="cvwrap">
@@ -780,6 +801,20 @@ else{on=next;ph.classList.toggle('color',on)}
 ph.setAttribute('aria-pressed',on);busy=false}
 ph.addEventListener('click',toggle);ph.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}});
 })();
+/* breadcrumb follows the section in view */
+(()=>{const now=document.getElementById('crumbNow');if(!now)return;
+const items=[...document.querySelectorAll('.top nav a')].map(a=>[document.querySelector(a.getAttribute('href')),a.textContent]).filter(x=>x[0]);
+let cur='Intro';const tick=()=>{let n='Intro';const y=innerHeight*.4;items.forEach(([el,t])=>{if(el.getBoundingClientRect().top<y)n=t});
+if(n!==cur){cur=n;now.classList.add('swap');setTimeout(()=>{now.textContent=n;now.classList.remove('swap')},180)}};
+addEventListener('scroll',tick,{passive:true});tick();})();
+/* photo nudge: a quick colour peek until someone tries it */
+(()=>{const ph=document.getElementById('ph');if(!ph||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+let done=false,vis=false;const stop=()=>{done=true};['pointerenter','click','keydown'].forEach(e=>ph.addEventListener(e,stop,{once:true}));
+if('IntersectionObserver' in window)new IntersectionObserver(es=>{vis=es[0].isIntersecting},{threshold:.6}).observe(ph);else vis=true;
+const peek=()=>{if(done)return;if(vis&&!ph.classList.contains('color')&&!ph.classList.contains('busy')){const r=ph.getBoundingClientRect();
+ph.style.setProperty('--x','52%');ph.style.setProperty('--y','30%');ph.style.setProperty('--r',Math.round(r.width*.2)+'px');ph.style.setProperty('--nx','52%');ph.style.setProperty('--ny','30%');
+ph.classList.add('lens','nudge');setTimeout(()=>{if(!done)ph.classList.remove('lens');ph.classList.remove('nudge')},1100)}
+setTimeout(peek,5200)};setTimeout(peek,1800);})();
 </script>
 
 </body>
