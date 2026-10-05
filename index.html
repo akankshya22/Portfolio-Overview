@@ -60,7 +60,7 @@ h1,h2,h3{font-weight:500;letter-spacing:-.022em;line-height:1.1;text-wrap:balanc
 /* hero */
 .hero{padding-block:clamp(72px,12vw,152px) clamp(56px,8vw,96px)}
 .status{display:inline-flex;align-items:center;gap:10px;font-size:14px;color:var(--fg-2);margin-bottom:clamp(28px,4vw,40px)}
-.status i{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent)}
+.status i{flex:0 0 7px;width:7px;height:7px;aspect-ratio:1;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent)}
 .hero h1{grid-column:1/11;font-size:clamp(2.1rem,5.2vw,4.25rem);line-height:1.08;letter-spacing:-.032em;font-weight:400}
 .hero h1 span:not(.rot){color:var(--fg-3)}
 .facts{margin-top:clamp(48px,7vw,88px);padding-top:22px;border-top:1px solid var(--line);row-gap:24px}
@@ -367,12 +367,20 @@ a.cval:hover{color:var(--accent)}
   .strip{grid-template-columns:repeat(2,minmax(0,1fr))}
   .portrait{grid-column:1/-1;max-width:320px}
   .cv{grid-template-columns:minmax(0,1fr)}
-  .top nav a:nth-child(n+3){display:none}
   .hero__photo{grid-column:1/-1;max-width:340px}
   .steps{grid-template-columns:minmax(0,1fr)}
 }
 @media (hover:none){.peek{display:none}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}.rot.out{opacity:1;transform:none}}
+
+/* nav: all sections; second scrollable row on small screens */
+.top nav{white-space:nowrap}
+@media (max-width:860px){
+  .top .wrap{flex-wrap:wrap;row-gap:10px;padding-bottom:0}
+  .top nav{order:3;flex:1 0 100%;overflow-x:auto;scrollbar-width:none;gap:22px;padding:2px 0 12px;margin-inline:-2px;-webkit-overflow-scrolling:touch;mask-image:linear-gradient(90deg,#000 88%,transparent)}
+  .top nav::-webkit-scrollbar{display:none}
+  .top nav a::after{bottom:4px}
+}
 </style>
 </head>
 <body>
@@ -381,7 +389,7 @@ a.cval:hover{color:var(--accent)}
 <header class="top">
   <div class="wrap">
     <div class="top__id"><a class="top__name" href="#top">Akankshya Pradhan</a><span class="top__tag">Portfolio overview</span></div>
-    <nav aria-label="Sections"><a href="#work">Work</a><a href="#about">About</a><a href="#side">Side projects</a><a href="#contact">Contact</a></nav>
+    <nav aria-label="Sections"><a href="#process">How I work</a><a href="#work">Work</a><a href="#side">Side project</a><a href="#playground">Playground</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
   </div>
 </header>
 
@@ -703,7 +711,7 @@ a.cval:hover{color:var(--accent)}
   // nav highlight
   var links={}; document.querySelectorAll('.top nav a').forEach(function(a){links[a.getAttribute('href').slice(1)]=a;});
   if('IntersectionObserver' in window){
-    var io=new IntersectionObserver(function(es){es.forEach(function(e){ if(e.isIntersecting && links[e.target.id]){ Object.values(links).forEach(function(l){l.classList.remove('on');}); links[e.target.id].classList.add('on'); } });},{rootMargin:'-45% 0px -50% 0px'});
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){ if(e.isIntersecting && links[e.target.id]){ Object.values(links).forEach(function(l){l.classList.remove('on');}); links[e.target.id].classList.add('on'); var nv=links[e.target.id].parentNode; if(nv.scrollWidth>nv.clientWidth){ nv.scrollTo({left:links[e.target.id].offsetLeft-nv.clientWidth/2+links[e.target.id].offsetWidth/2,behavior:'smooth'}); } } });},{rootMargin:'-45% 0px -50% 0px'});
     Object.keys(links).forEach(function(id){var el=document.getElementById(id); if(el) io.observe(el);});
   }
   // process steps: light up in sequence once
