@@ -373,14 +373,30 @@ a.cval:hover{color:var(--accent)}
 @media (hover:none){.peek{display:none}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}.rot.out{opacity:1;transform:none}}
 
-/* nav: all sections; second scrollable row on small screens */
+/* nav: inline on desktop, drawer on small screens */
 .top nav{white-space:nowrap}
-@media (max-width:860px){
-  .top .wrap{flex-wrap:wrap;row-gap:10px;padding-bottom:0}
-  .top nav{order:3;flex:1 0 100%;overflow-x:auto;scrollbar-width:none;gap:22px;padding:2px 0 12px;margin-inline:-2px;-webkit-overflow-scrolling:touch;mask-image:linear-gradient(90deg,#000 88%,transparent)}
-  .top nav::-webkit-scrollbar{display:none}
-  .top nav a::after{bottom:4px}
-}
+.menu{display:none;width:40px;height:40px;margin-right:-8px;border:0;background:none;cursor:pointer;flex-direction:column;justify-content:center;align-items:center;gap:5px;border-radius:50%}
+.menu span{display:block;width:20px;height:1.5px;background:var(--fg);border-radius:2px;transition:transform .3s,opacity .3s}
+.menu:hover span:nth-child(2){transform:translateX(3px)}
+.scrim{position:fixed;inset:0;z-index:30;background:color-mix(in srgb,var(--fg) 28%,transparent);opacity:0;transition:opacity .3s}
+.scrim.on{opacity:1}
+.drawer{position:fixed;top:0;right:0;bottom:0;z-index:31;width:min(340px,86vw);background:var(--bg);border-left:1px solid var(--line);display:flex;flex-direction:column;padding:20px 24px calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(100%);transition:transform .38s cubic-bezier(.2,.7,.2,1);visibility:hidden}
+.drawer.open{transform:none;visibility:visible}
+.drawer__head{display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.drawer .mono{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-3)}
+.drawer__close{width:40px;height:40px;margin-right:-10px;border:0;background:none;font-size:28px;line-height:1;color:var(--fg);cursor:pointer}
+.drawer__list{list-style:none;padding:8px 0 0;margin:0}
+.drawer__list a{display:flex;align-items:baseline;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--fg);font-size:24px;letter-spacing:-.02em;opacity:0;transform:translateX(16px);transition:opacity .3s,transform .4s cubic-bezier(.2,.7,.2,1),color .2s}
+.drawer.open .drawer__list a{opacity:1;transform:none}
+.drawer.open .drawer__list li:nth-child(2) a{transition-delay:.04s}.drawer.open .drawer__list li:nth-child(3) a{transition-delay:.08s}.drawer.open .drawer__list li:nth-child(4) a{transition-delay:.12s}.drawer.open .drawer__list li:nth-child(5) a{transition-delay:.16s}.drawer.open .drawer__list li:nth-child(6) a{transition-delay:.2s}
+.drawer__list a:hover,.drawer__list a.on{color:var(--accent)}
+.drawer__list a.on .mono{color:var(--accent)}
+.drawer__foot{margin-top:auto;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.drawer__foot a{color:var(--fg-2);text-decoration:none}
+body.locked{overflow:hidden}
+@media (max-width:860px){.top nav{display:none}.menu{display:flex}}
+@media (prefers-reduced-motion:reduce){.drawer,.drawer__list a,.scrim{transition:none}}
+
 
 /* breadcrumb */
 .crumb{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-3);white-space:nowrap;min-width:0}
@@ -409,9 +425,15 @@ a.cval:hover{color:var(--accent)}
 <header class="top">
   <div class="wrap">
     <div class="top__id"><a class="top__name" href="#top">Akankshya Pradhan</a><span class="crumb" aria-live="polite"><span class="crumb__root">Portfolio overview</span><span class="crumb__sep" aria-hidden="true">/</span><span class="crumb__now" id="crumbNow">Intro</span></span></div>
-    <nav aria-label="Sections"><a href="#process">How I work</a><a href="#work">Work</a><a href="#side">Side project</a><a href="#playground">Playground</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
+    <nav aria-label="Sections"><a href="#process">How I work</a><a href="#work">Work</a><a href="#side">Side project</a><a href="#playground">Playground</a><a href="#about">About</a><a href="#contact">Contact</a></nav><button class="menu" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="drawer"><span></span><span></span><span></span></button>
   </div>
 </header>
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" aria-label="Menu" aria-hidden="true">
+  <div class="drawer__head"><span class="mono">Portfolio overview</span><button class="drawer__close" id="menuClose" type="button" aria-label="Close menu">×</button></div>
+  <ul class="drawer__list"><li><a href="#process"><span class="mono">00</span>How I work</a></li><li><a href="#work"><span class="mono">01</span>Work</a></li><li><a href="#side"><span class="mono">02</span>Side project</a></li><li><a href="#playground"><span class="mono">03</span>Playground</a></li><li><a href="#about"><span class="mono">04</span>About</a></li><li><a href="#contact"><span class="mono">05</span>Contact</a></li></ul>
+  <div class="drawer__foot"><a href="mailto:akankshyapradhan22@gmail.com">akankshyapradhan22@gmail.com</a><a href="https://www.linkedin.com/in/akankshya-pradhan/" target="_blank" rel="noopener">LinkedIn ↗</a></div>
+</aside>
 
 <main id="top">
 <section class="hero" aria-label="Introduction">
@@ -815,6 +837,15 @@ const peek=()=>{if(done)return;if(vis&&!ph.classList.contains('color')&&!ph.clas
 ph.style.setProperty('--x','52%');ph.style.setProperty('--y','30%');ph.style.setProperty('--r',Math.round(r.width*.2)+'px');ph.style.setProperty('--nx','52%');ph.style.setProperty('--ny','30%');
 ph.classList.add('lens','nudge');setTimeout(()=>{if(!done)ph.classList.remove('lens');ph.classList.remove('nudge')},1100)}
 setTimeout(peek,5200)};setTimeout(peek,1800);})();
+/* drawer menu */
+(()=>{const btn=document.getElementById('menuBtn'),d=document.getElementById('drawer'),sc=document.getElementById('scrim'),x=document.getElementById('menuClose');if(!btn)return;
+const set=o=>{d.classList.toggle('open',o);d.setAttribute('aria-hidden',!o);btn.setAttribute('aria-expanded',o);document.body.classList.toggle('locked',o);
+if(o){sc.hidden=false;requestAnimationFrame(()=>sc.classList.add('on'));setTimeout(()=>x.focus(),50)}else{sc.classList.remove('on');setTimeout(()=>{if(!d.classList.contains('open'))sc.hidden=true},300);btn.focus({preventScroll:true})}};
+btn.addEventListener('click',()=>set(true));x.addEventListener('click',()=>set(false));sc.addEventListener('click',()=>set(false));
+addEventListener('keydown',e=>{if(e.key==='Escape'&&d.classList.contains('open'))set(false)});
+d.querySelectorAll('.drawer__list a').forEach(a=>a.addEventListener('click',()=>set(false)));
+const now=document.getElementById('crumbNow');if(now)new MutationObserver(()=>{d.querySelectorAll('.drawer__list a').forEach(a=>a.classList.toggle('on',a.textContent.slice(2)===now.textContent))}).observe(now,{childList:true});
+})();
 </script>
 
 </body>
