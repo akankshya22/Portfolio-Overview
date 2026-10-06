@@ -424,6 +424,40 @@ body.locked{overflow:hidden}
 .top__name .ch.go{animation:hop .55s cubic-bezier(.3,.7,.3,1.4);color:var(--accent)}
 @keyframes hop{0%{transform:none}40%{transform:translateY(-5px) rotate(-6deg)}100%{transform:none}}
 @media (prefers-reduced-motion:reduce){.top__name .ch.go{animation:none}}
+
+/* commit-history grid */
+.cal{padding-block:clamp(56px,8vw,104px)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:clamp(28px,4vw,44px) 0 clamp(28px,4vw,40px)}
+.stats div{border-top:1px solid var(--line);padding-top:14px;display:grid;gap:4px}
+.stats b{font-weight:400;font-size:clamp(2.2rem,4.5vw,3.4rem);letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.stats span{font-size:14px;color:var(--fg-2)}
+.cal__bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{font:inherit;font-size:13px;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--fg-2);cursor:pointer;transition:all .2s}
+.chip:hover{border-color:var(--fg-3);color:var(--fg)}
+.chip.on{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.cal__scroll{overflow-x:auto;scrollbar-width:thin;padding-bottom:6px}
+.cal__grid{display:grid;grid-template-columns:44px repeat(12,minmax(16px,1fr));gap:5px;max-width:640px;min-width:290px}
+.cal__grid .yl{font-family:var(--mono);font-size:11px;color:var(--fg-3);align-self:center}
+.cal__grid .ml{font-family:var(--mono);font-size:10px;color:var(--fg-3);text-align:center;text-transform:uppercase;letter-spacing:.04em}
+.cell{aspect-ratio:1;border-radius:4px;border:0;padding:0;cursor:pointer;background:var(--c0);transition:transform .15s,opacity .25s,outline-color .15s;outline:2px solid transparent;outline-offset:1px;opacity:0;transform:scale(.6)}
+.cal.in .cell{opacity:1;transform:none;transition:opacity .35s var(--d),transform .45s cubic-bezier(.2,.7,.2,1.3) var(--d)}
+.cal.in .cell.dim{opacity:.22;filter:grayscale(1);transition-delay:0s}
+.cell:hover,.cell:focus-visible,.cell.sel{outline-color:var(--fg);transform:scale(1.12)!important;z-index:1}
+.cell.fut{background:transparent;border:1px dashed var(--line);cursor:default}
+.cell.now{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--accent)}
+.cal{--c0:var(--surface);--c1:color-mix(in srgb,var(--accent) 28%,var(--surface));--c2:color-mix(in srgb,var(--accent) 58%,var(--surface));--c3:var(--accent)}
+.l0{background:var(--c0)}.l1{background:var(--c1)}.l2{background:var(--c2)}.l3{background:var(--c3)}
+.cal__foot{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:16px}
+@media (min-width:900px){.cal__body{display:grid;grid-template-columns:minmax(0,640px) minmax(0,1fr);gap:56px;align-items:end}.cal__foot{flex-direction:column;align-items:flex-start;gap:24px;margin:0;padding-bottom:6px}.cal__tip{font-size:clamp(1.1rem,1.6vw,1.35rem);line-height:1.5;min-height:6em}}
+.cal__tip{font-size:15px;color:var(--fg-2);min-height:1.5em;margin:0}
+.cal__tip b{font-weight:500;color:var(--fg)}
+.cal__legend{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:11px;color:var(--fg-3)}
+.cal__legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.cal__table{margin-top:20px;font-size:14px;color:var(--fg-2)}
+.cal__table summary{cursor:pointer;color:var(--fg-3);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.cal__table ul{margin:12px 0 0;padding-left:18px;display:grid;gap:4px}
+@media (max-width:700px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.cal__grid{grid-template-columns:34px repeat(12,minmax(16px,1fr));gap:3px}}
+@media (prefers-reduced-motion:reduce){.cell,.cal.in .cell{opacity:1;transform:none;transition:none}}
 </style>
 </head>
 <body>
@@ -667,6 +701,34 @@ body.locked{overflow:hidden}
   </div>
 </section>
 
+<section class="cal" id="journey" aria-labelledby="cal-h">
+  <div class="wrap">
+    <div class="grid shead">
+      <h2 id="cal-h">Commit history</h2>
+      <p>My journey so far, one square per month. The darker a square, the more I had going on at once.</p>
+      <span class="mono">2018 to now</span>
+    </div>
+    <div class="stats" id="stats">
+      <div><b data-to="6">0</b><span>years designing</span></div>
+      <div><b data-to="4">0</b><span>companies</span></div>
+      <div><b data-to="2">0</b><span>degrees, one in each world</span></div>
+      <div><b data-to="0" id="monthsStat">0</b><span>months on the grid</span></div>
+    </div>
+    <div class="cal__bar" role="group" aria-label="Highlight">
+      <button type="button" class="chip on" data-k="all">Everything</button>
+      <button type="button" class="chip" data-k="study">Studying</button>
+      <button type="button" class="chip" data-k="job">Full-time roles</button>
+      <button type="button" class="chip" data-k="free">Freelance</button>
+    </div>
+    <div class="cal__body">
+    <div class="cal__scroll"><div class="cal__grid" id="calGrid" role="img" aria-label="Grid of months from 2018 to 2026 showing study, jobs and freelance work"></div></div>
+    <div class="cal__foot"><p class="cal__tip" id="calTip" aria-live="polite">Hover or tap a square to see what was happening.</p>
+      <span class="cal__legend" aria-hidden="true">Less <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i> More</span></div>
+    </div>
+    <details class="cal__table"><summary>See it as a list</summary><ul id="calList"></ul></details>
+  </div>
+</section>
+
 <section class="about" id="about" aria-labelledby="about-h">
   <div class="wrap">
     <div class="grid shead">
@@ -688,8 +750,8 @@ body.locked{overflow:hidden}
           <div>
             <h4>Experience</h4>
             <ol>
-              <li><b>ATI Robotics</b><span>UX Designer · Now</span></li>
-              <li><b>HP Inc</b><span>Interaction Designer, design systems · From Mar 2024</span></li>
+              <li><b>ATI Robotics</b><span>UX Designer · Nov 2025 – Now</span></li>
+              <li><b>HP Inc</b><span>Interaction Designer, design systems · Mar 2024 – Oct 2025</span></li>
               <li><b>Swish Club</b><span>Product Designer · Feb – Mar 2024</span></li>
               <li><b>Welspun</b><span>Product Designer · Jun – Aug 2023</span></li>
               <li><b>Freelance</b><span>UI and Visual Designer · Since Aug 2020</span></li>
@@ -860,6 +922,43 @@ const still=matchMedia('(prefers-reduced-motion:reduce)').matches;let busy=false
 const wave=()=>{if(busy)return;busy=true;chs.forEach((c,k)=>setTimeout(()=>{if(c.textContent!==' '){if(!still)c.style.fontFamily=faces[(k+Math.floor(Math.random()*faces.length))%faces.length];c.classList.add('go');
 setTimeout(()=>{c.style.fontFamily='';c.classList.remove('go')},520)}},k*45));setTimeout(()=>busy=false,chs.length*45+560)};
 el.addEventListener('pointerenter',wave);el.addEventListener('focus',wave);el.addEventListener('touchstart',wave,{passive:true});setTimeout(wave,900);})();
+/* commit history: months from 2018, layered by what was going on */
+(()=>{const g=document.getElementById('calGrid');if(!g)return;
+const ATI_START=[2025,11]; // year, month (1-12)
+const T=[
+ {k:'study',n:'B.Tech in Computer Science, VSSUT',a:[2018,7],b:[2022,6]},
+ {k:'study',n:'M.Des in User Experience, NIFT Mumbai',a:[2022,7],b:[2024,6]},
+ {k:'free',n:'Freelance UI and visual design',a:[2020,8],b:null},
+ {k:'job',n:'Product Designer, Welspun',a:[2023,6],b:[2023,8]},
+ {k:'job',n:'Product Designer, Swish Club',a:[2024,2],b:[2024,3]},
+ {k:'job',n:'Interaction Designer, HP Inc',a:[2024,3],b:[ATI_START[0],ATI_START[1]-1||12]},
+ {k:'job',n:'UX Designer, ATI Robotics',a:ATI_START,b:null}];
+const now=new Date(),NY=now.getFullYear(),NM=now.getMonth()+1,idx=(y,m)=>y*12+m-1,cur=idx(NY,NM);
+const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+g.appendChild(document.createElement('span'));M.forEach(m=>{const e=document.createElement('span');e.className='ml';e.textContent=m[0];e.title=m;g.appendChild(e)});
+const cells=[];let n=0,count=0;
+for(let y=2018;y<=NY;y++){const yl=document.createElement('span');yl.className='yl';yl.textContent=y;g.appendChild(yl);
+ for(let m=1;m<=12;m++){const i=idx(y,m),b=document.createElement('button');b.type='button';b.className='cell';
+  if(i>cur){b.classList.add('fut');b.disabled=true;b.setAttribute('aria-hidden','true');g.appendChild(b);continue}
+  const on=T.filter(t=>i>=idx(...t.a)&&(!t.b||i<=idx(t.b[0],t.b[1])));
+  const lv=Math.min(3,on.length);b.style.background=`var(--c${lv})`;b.style.setProperty('--d',(n++*6)+'ms');
+  if(i===cur)b.classList.add('now');if(on.length)count++;
+  const label=`${M[m-1]} ${y}`;b.dataset.ks=on.map(t=>t.k).join(' ');b.dataset.tip=on.length?`<b>${label}</b>: ${on.map(t=>t.n).join(' · ')}`:`<b>${label}</b>: before design, still finding my way`;
+  b.setAttribute('aria-label',label+': '+(on.length?on.map(t=>t.n).join(', '):'nothing yet'));cells.push(b);g.appendChild(b)}}
+const tip=document.getElementById('calTip');let sel=null;
+const show=b=>{tip.innerHTML=b.dataset.tip};
+cells.forEach(b=>{b.addEventListener('mouseenter',()=>show(b));b.addEventListener('focus',()=>show(b));
+ b.addEventListener('click',()=>{if(sel)sel.classList.remove('sel');sel=b;b.classList.add('sel');show(b)})});
+document.querySelectorAll('.cal__bar .chip').forEach(c=>c.addEventListener('click',()=>{
+ document.querySelectorAll('.cal__bar .chip').forEach(x=>x.classList.toggle('on',x===c));const k=c.dataset.k;
+ cells.forEach(b=>b.classList.toggle('dim',k!=='all'&&!b.dataset.ks.split(' ').includes(k)))}));
+document.getElementById('calList').innerHTML=T.map(t=>`<li>${t.n}: ${M[t.a[1]-1]} ${t.a[0]} to ${t.b?M[t.b[1]-1]+' '+t.b[0]:'now'}</li>`).join('');
+document.getElementById('monthsStat').dataset.to=count;
+const sec=document.getElementById('journey'),still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const run=()=>{sec.classList.add('in');document.querySelectorAll('#stats b').forEach(el=>{const to=+el.dataset.to;if(still){el.textContent=to;return}
+ const t0=performance.now();const st=t=>{const p=Math.min(1,(t-t0)/1100);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(st)};requestAnimationFrame(st)})};
+if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>{if(es[0].isIntersecting){run();io.disconnect()}},{threshold:.25});io.observe(sec)}else run();
+})();
 </script>
 
 </body>
