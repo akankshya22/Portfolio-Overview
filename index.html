@@ -458,6 +458,18 @@ body.locked{overflow:hidden}
 .cal__table ul{margin:12px 0 0;padding-left:18px;display:grid;gap:4px}
 @media (max-width:700px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.cal__grid{grid-template-columns:34px repeat(12,minmax(16px,1fr));gap:3px}}
 @media (prefers-reduced-motion:reduce){.cell,.cal.in .cell{opacity:1;transform:none;transition:none}}
+
+.chip--fun{border-style:dashed}
+.cell{position:relative}
+.cell::after{content:"";position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(10px,1.4vw,15px);line-height:1;color:#fff;opacity:0;transform:scale(.3) rotate(-30deg);transition:opacity .3s var(--fd,0s),transform .45s cubic-bezier(.3,.7,.3,1.5) var(--fd,0s);pointer-events:none}
+.cal__grid.m-tinker .cell:not(.fut)::after{content:"✦";opacity:1;transform:none}
+.cal__grid.m-read .cell:not(.fut)::after{content:"";width:34%;height:44%;margin:auto;border-radius:1px 2px 2px 1px;background:#fff;box-shadow:inset 1.5px 0 0 rgba(0,0,0,.2);opacity:.95;transform:rotate(-8deg)}
+.cal__grid.m-tinker .cell:not(.fut):nth-child(3n)::after{transform:rotate(25deg) scale(.8)}
+.cal__grid.m-tinker .cell:not(.fut):nth-child(4n)::after{transform:rotate(-20deg) scale(1.15)}
+.cal__grid.m-read .cell:not(.fut):nth-child(2n)::after{transform:rotate(6deg)}
+.cal__grid.m-read .cell:not(.fut)[style*="--c0"]::after,.cal__grid.m-tinker .cell:not(.fut)[style*="--c0"]::after{color:var(--accent);background:var(--accent)}
+.cal__grid.m-tinker .cell:not(.fut)[style*="--c0"]::after{background:none}
+@media (prefers-reduced-motion:reduce){.cell::after{transition:none}}
 </style>
 </head>
 <body>
@@ -719,6 +731,8 @@ body.locked{overflow:hidden}
       <button type="button" class="chip" data-k="study">Studying</button>
       <button type="button" class="chip" data-k="job">Full-time roles</button>
       <button type="button" class="chip" data-k="free">Freelance</button>
+      <button type="button" class="chip chip--fun" data-k="tinker">✦ Tinkering</button>
+      <button type="button" class="chip chip--fun" data-k="read">📖 Reading</button>
     </div>
     <div class="cal__body">
     <div class="cal__scroll"><div class="cal__grid" id="calGrid" role="img" aria-label="Grid of months from 2018 to 2026 showing study, jobs and freelance work"></div></div>
@@ -949,9 +963,16 @@ const tip=document.getElementById('calTip');let sel=null;
 const show=b=>{tip.innerHTML=b.dataset.tip};
 cells.forEach(b=>{b.addEventListener('mouseenter',()=>show(b));b.addEventListener('focus',()=>show(b));
  b.addEventListener('click',()=>{if(sel)sel.classList.remove('sel');sel=b;b.classList.add('sel');show(b)})});
+const FUN={tinker:'<b>Tinkering</b>: always on. Side projects, half-built ideas and things like Travel Quest and Through Your Letters happen in the gaps between everything else.',
+ read:'<b>Reading</b>: always on, every single month. Right now it\'s <em>Educated</em> by Tara Westover.'};
+let mode='all';
+cells.forEach(b=>{b.style.setProperty('--fd',(Math.random()*.6).toFixed(2)+'s');b.dataset.base=b.dataset.tip});
 document.querySelectorAll('.cal__bar .chip').forEach(c=>c.addEventListener('click',()=>{
- document.querySelectorAll('.cal__bar .chip').forEach(x=>x.classList.toggle('on',x===c));const k=c.dataset.k;
- cells.forEach(b=>b.classList.toggle('dim',k!=='all'&&!b.dataset.ks.split(' ').includes(k)))}));
+ document.querySelectorAll('.cal__bar .chip').forEach(x=>x.classList.toggle('on',x===c));const k=c.dataset.k;mode=k;
+ g.classList.toggle('m-tinker',k==='tinker');g.classList.toggle('m-read',k==='read');
+ cells.forEach(b=>{b.classList.toggle('dim',!FUN[k]&&k!=='all'&&!b.dataset.ks.split(' ').includes(k));
+  b.dataset.tip=FUN[k]?b.dataset.base.replace(/:.*$/,'')+(k==='read'?': reading something, obviously':': tinkering with something on the side'):b.dataset.base});
+ if(FUN[k])tip.innerHTML=FUN[k];}));
 document.getElementById('calList').innerHTML=T.map(t=>`<li>${t.n}: ${M[t.a[1]-1]} ${t.a[0]} to ${t.b?M[t.b[1]-1]+' '+t.b[0]:'now'}</li>`).join('');
 document.getElementById('monthsStat').dataset.to=count;
 const sec=document.getElementById('journey'),still=matchMedia('(prefers-reduced-motion:reduce)').matches;
